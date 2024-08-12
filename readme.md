@@ -34,6 +34,7 @@ Or you can run it from Maven directly using the Spring Boot Maven plugin. If you
 There is no `Dockerfile` in this project. You can build a container image (if you have a docker daemon) using the Spring Boot build plugin:
 
 ```bash
+### end
 ./mvnw spring-boot:build-image
 ```
 
