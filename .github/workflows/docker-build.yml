@@ -1,0 +1,42 @@
+name: CI/CD Pipeline for Spring PetClinic
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: Linux  # Specifies the self-hosted runner with the "Linux" tag
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # - name: Set up Docker Buildx
+    #   uses: docker/setup-buildx-action@v2
+
+    # - name: Log in to DockerHub
+    #   uses: docker/login-action@v3
+      # with:
+      #   username: ${{ secrets.DOCKER_USERNAME }}
+      #   password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build Docker Image
+      run: docker build . -t spring-petclinic:cicd
+
+    - name: Remove existing containers
+      run: |
+        docker ps -a --filter "name=petclinic-cicd" --format "{{.ID}}" | xargs --no-run-if-empty docker rm -f
+
+    - name: Run Docker Container
+      run: docker run -d --name petclinic-cicd -p 8080:8080 spring-petclinic:cicd
+
+    - name: Wait for service to be up
+      run: sleep 10
+
+    - name: Test if the application is running
+      run: curl --fail http://localhost:8080 || exit 1
