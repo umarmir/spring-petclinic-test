@@ -9,9 +9,8 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: Linux  # Specifies the self-hosted runner with the "Linux" tag
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -27,7 +26,9 @@ jobs:
 
     - name: Build Docker Image
       run: docker build . -t spring-petclinic:cicd
-
+  deploy:
+    runs-on: Linux  # Specifies the self-hosted runner with the "Linux" tag
+    steps:
     - name: Remove existing containers
       run: |
         docker ps -a --filter "name=petclinic-cicd" --format "{{.ID}}" | xargs --no-run-if-empty docker rm -f
@@ -35,8 +36,11 @@ jobs:
     - name: Run Docker Container
       run: docker run -d --name petclinic-cicd -p 8080:8080 spring-petclinic:cicd
 
+  test:
+    runs-on: Linux  # Specifies the self-hosted runner with the "Linux" tag
+    steps:
     - name: Wait for service to be up
-      run: sleep 10
+      run: sleep 30
 
     - name: Test if the application is running
       run: curl --fail http://localhost:8080 || exit 1
